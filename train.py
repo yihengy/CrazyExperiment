@@ -11,7 +11,6 @@ import glob
 import torch.optim as optim
 import uproot
 import matplotlib.pyplot as plt
-from magiconfig import ArgumentParser, MagiConfigOptions
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
