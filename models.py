@@ -9,7 +9,7 @@ from torch.autograd import Variable
 class DnCNN(nn.Module):
     def __init__(self, channels=1, num_of_layers=9):
         super(DnCNN, self).__init__()
-        kernel_size = 21
+        kernel_size = 3
         padding = 1
         features = 64
         layers = []
