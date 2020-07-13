@@ -31,12 +31,14 @@ def init_weights(m):
     if classname.find('Conv') != -1:
         nn.init.xavier_uniform_(m.weight)
         nn.init.constant(m.bias.data, 0.01)
+'''
     elif classname.find('Linear') != -1:
         nn.init.xavier_uniform_(m.weight)
         nn.init.constant(m.bias.data, 0.01)
     elif classname.find('BatchNorm') != -1:
         nn.init.xavier_uniform_(m.weight)
         nn.init.constant(m.bias.data, 0.01)
+'''
 
 def main():
     args.device = torch.device('cpu')
