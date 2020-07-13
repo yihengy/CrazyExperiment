@@ -29,14 +29,14 @@ args = parser.parse_args()
 def init_weights(m):
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
-        nn.init.xavier_uniform(m.weight)
-        m.bias.data.fill_(0.01)
+        nn.init.xavier_uniform_(m.weight)
+        nn.init.constant(m.bias.data, 0.01)
     elif classname.find('Linear') != -1:
-        nn.init.xavier_uniform(m.weight)
-        m.bias.data.fill_(0.01)
+        nn.init.xavier_uniform_(m.weight)
+        nn.init.constant(m.bias.data, 0.01)
     elif classname.find('BatchNorm') != -1:
-        nn.init.xavier_uniform(m.weight)
-        m.bias.data.fill_(0.01)
+        nn.init.xavier_uniform_(m.weight)
+        nn.init.constant(m.bias.data, 0.01)
 
 def main():
     args.device = torch.device('cpu')
