@@ -16,7 +16,7 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # parse arguments
-parser = ArgumentParser(description="DnCNN", config_options=MagiConfigOptions())
+parser = argparse.ArgumentParser(description="DnCNN", config_options=MagiConfigOptions())
 parser.add_argument("training_path", nargs="?", type=str, default="./data/training", help='path of .root data set to be used for training')
 parser.add_argument("validation_path", nargs="?", type=str, default="./data/validation", help='path of .root data set to be used for validation')
 parser.add_argument("--num_of_layers", type=int, default=9, help="Number of total layers")
