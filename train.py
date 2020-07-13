@@ -10,7 +10,6 @@ from dataset import *
 import glob
 import torch.optim as optim
 import uproot
-from tensorboardX import SummaryWriter
 import matplotlib.pyplot as plt
 from magiconfig import ArgumentParser, MagiConfigOptions
 

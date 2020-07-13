@@ -51,4 +51,4 @@ if __name__=="__main__":
     net = DnCNN()
     input = torch.randn(1, 1, 32, 32)
     out = net(input)
-    
+    print(out)
