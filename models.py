@@ -9,7 +9,7 @@ from torch.autograd import Variable
 class DnCNN(nn.Module):
     def __init__(self, channels=1, num_of_layers=9):
         super(DnCNN, self).__init__()
-        kernel_size = 1
+        kernel_size = 5
         padding = 1
         features = 64
         layers = []
@@ -46,13 +46,13 @@ class PatchLoss(nn.Module):
 
 
 if __name__=="__main__":
-    #criterion = PatchLoss()
-    criterion = nn.MSELoss(size_average=False)
+    criterion = PatchLoss()
     dtype = torch.FloatTensor
     x = Variable(torch.randn(100, 100).type(dtype), requires_grad=False)
     y = Variable(torch.randn(100, 100).type(dtype), requires_grad=False)
-    #loss = criterion(x, y, 10)
-    loss = criterion(x, y)
+    loss = criterion(x, y, 10)
+    print("Test loss: ")
+    print(str(loss))
     net = DnCNN()
     input = torch.randn(1, 1, 32, 32)
     out = net(input)
