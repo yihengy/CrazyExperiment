@@ -46,11 +46,13 @@ class PatchLoss(nn.Module):
 
 
 if __name__=="__main__":
-    criterion = PatchLoss()
+    #criterion = PatchLoss()
+    criterion = nn.MSELoss(size_average=False)
     dtype = torch.FloatTensor
     x = Variable(torch.randn(100, 100).type(dtype), requires_grad=False)
     y = Variable(torch.randn(100, 100).type(dtype), requires_grad=False)
-    loss = criterion(x, y, 10)
+    #loss = criterion(x, y, 10)
+    loss = criterion(x, y)
     net = DnCNN()
     input = torch.randn(1, 1, 32, 32)
     out = net(input)
