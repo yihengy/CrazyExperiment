@@ -99,6 +99,7 @@ def main():
     loss_plot = plt.plot(loss_per_epoch)
     plt.savefig("loss_plot_july_14.png")
 '''
+'''
 def main():
     # choose cpu or gpu
     if torch.cuda.is_available():
@@ -175,6 +176,69 @@ def main():
     plt.savefig("v_loss_plot_July_15.png")
     plt.legend()
     plt.savefig("total_loss_plot_July_15.png")
+'''
+
+def main():
+    machine = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = DnCNN(channels=1, num_of_layers=args.num_of_layers).to(device=machine)
+    model.apply(init_weights)
+    criterion = PatchLoss()
+    criterion.to(device=machine)
+    optimizer = optim.Adam(model.parameters(), lr = args.lr)
+
+    loss_per_epoch = np.zeros(args.epochs)
+    # train the net
+    step = 0
+    for epoch in range(args.epochs):
+        print("Beginning epoch " + str(epoch))
+        training_files = glob.glob(os.path.join(args.training_path, '*.root'))
+        for training_file in training_files:
+            print("Opened file " + training_file)
+            branch = get_all_histograms(training_file)
+            length = np.size(branch)
+            for i in range(length):
+                model.train()
+                model.zero_grad()
+                optimizer.zero_grad()
+                data = get_bin_weights(branch, 0).copy()
+                noisy = add_noise(data, args.sigma).copy()
+                data = torch.from_numpy(data).to(device=machine)
+                noisy = torch.from_numpy(noisy)
+                noisy = noisy.unsqueeze(0)
+                noisy = noisy.unsqueeze(1).to(device=machine)
+                out_train = model(noisy.float()).to(device=machine)
+                loss = criterion(out_train.squeeze(0).squeeze(0), data, 10)
+                loss.backward()
+                optimizer.step()
+                model.eval()
+            model.eval()
+        
+        # validation
+        validation_files = glob.glob(os.path.join(args.validation_path, '*root'))
+        epoch_loss = 0
+        count = 0
+        for validation_file in validation_files:
+            print("Opened file " + validation_file)
+            branch = get_all_histograms(validation_file)
+            length = np.size(branch)
+            for i in range (length):
+                data = get_bin_weights(branch, 0).copy()
+                noisy = add_noise(data, args.sigma).copy()
+                data = torch.from_numpy(data).to(device=machine)
+                noisy = torch.from_numpy(noisy)
+                noisy = noisy.unsqueeze(0)
+                noisy = noisy.unsqueeze(1).to(device=machine)
+                out_train = model(noisy.float()).to(device=machine)
+                loss = criterion(out_train.squeeze(0).squeeze(0), data, 10)
+                epoch_loss+=loss.item()
+            epoch_loss/=length
+            count+=1
+        # save the model
+        torch.save(model.state_dict(), os.path.join(args.outf, 'net.pth'))
+        loss_per_epoch[epoch] = epoch_loss
+        print("Average loss per image in epoch " + str(epoch) + " of " + str(args.epochs-1) +": "+ str(epoch_loss))
+    loss_plot = plt.plot(loss_per_epoch)
+    plt.savefig("loss_plot_july_14.png")
 
 if __name__ == "__main__":
     main()
