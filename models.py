@@ -31,8 +31,8 @@ class PatchLoss(nn.Module):
 
     def forward(self, output, target, patch_size):
         # split output and target images into patches
-        output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
-        target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        output_patches = output.unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        target_patches = target.unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
         
         max_patch_loss = 0
         # calculate loss for each patch of the image
@@ -47,8 +47,8 @@ class WeightedPatchLoss(nn.Module):
 
     def forward(self, output, target, patch_size):
         # split output and target images into patches
-        output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
-        target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        output_patches = output.unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        target_patches = target.unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
         
         sum_weighted_loss = 0
         devider = 0
@@ -65,8 +65,8 @@ class FilteredPatchLoss(nn.Module):
 
     def forward(self, output, target, patch_size, filter_rate):
         # split output and target images into patches
-        output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
-        target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        output_patches = output.unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        target_patches = target.unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
         
         sum_valid_loss = 0
         invalid_count = 0
