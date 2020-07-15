@@ -171,7 +171,7 @@ def main():
         print("v: "+ str(val_loss/len(val_train)))
         # save the model
         model.eval()
-        torch.save(model.state_dict(), os.path.join(args.outf, 'net.pth'))
+        torch.save(model.state_dict(), os.path.join(args.outf, 'net_1.pth'))
     training = plt.plot(training_losses, label='training')
     validation = plt.plot(validation_losses, label='validation')
     plt.legend()
@@ -263,7 +263,7 @@ def main_2():
         print("v: "+ str(val_loss/len(val_train)))
         # save the model
         model.eval()
-        torch.save(model.state_dict(), os.path.join(args.outf, 'net.pth'))
+        torch.save(model.state_dict(), os.path.join(args.outf, 'net_2.pth'))
     training = plt.plot(training_losses, label='training')
     validation = plt.plot(validation_losses, label='validation')
     plt.legend()
@@ -338,11 +338,11 @@ def main_3():
         print("v: "+ str(val_loss/len(val_train)))
         # save the model
         model.eval()
-        torch.save(model.state_dict(), os.path.join(args.outf, 'net.pth'))
+        torch.save(model.state_dict(), os.path.join(args.outf, 'net_3.pth'))
     training = plt.plot(training_losses, label='training')
     validation = plt.plot(validation_losses, label='validation')
     plt.legend()
-    plt.savefig("Patchloss_plot_July_15.png")
+    plt.savefig("Filteredloss_plot_July_15.png")
 
 
 
