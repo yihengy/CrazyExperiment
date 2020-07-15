@@ -23,7 +23,7 @@ parser.add_argument("validation_path", nargs="?", type=str, default="./data/vali
 parser.add_argument("--num_of_layers", type=int, default=9, help="Number of total layers")
 parser.add_argument("--sigma", type=float, default=20, help='noise level')
 parser.add_argument("--outf", type=str, default="logs", help='path of log files')
-parser.add_argument("--epochs", type=int, default=15, help="Number of training epochs")
+parser.add_argument("--epochs", type=int, default=50, help="Number of training epochs")
 parser.add_argument("--lr", type=float, default=1e-3, help="Initial learning rate")
 parser.add_argument("--trainfile", type=str, default="test.root", help='path of .root file for training')
 parser.add_argument("--valfile", type=str, default="test.root", help='path of .root file for validation')
