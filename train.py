@@ -110,9 +110,9 @@ def main():
 
     # Load dataset
     print('Loading dataset ...\n')
-    dataset_train = RootDataset(root_file=args.trainfile, sigma = args.sigma)
+    dataset_train = RooDataset(root_file=args.trainfile, sigma = args.sigma)
     loader_train = DataLoader(dataset=dataset_train, batch_size=args.batchSize)
-    dataset_val = RootDataset(root_file=args.valfile, sigma=args.sigma)
+    dataset_val = RooDataset(root_file=args.valfile, sigma=args.sigma)
     val_train = DataLoader(dataset=dataset_val)
 
     # Build model
