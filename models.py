@@ -24,7 +24,7 @@ class DnCNN(nn.Module):
     def forward(self, x):
         out = self.dncnn(x)
         return out
-        
+'''
 class PatchLoss(nn.Module):
     def __initII(self, size_average=None, reduce=None, reduction: str = 'mean') -> None:
         super(PatchLoss, self).__init__(size_average, reduce, reduction)
@@ -80,6 +80,70 @@ class FilteredPatchLoss(nn.Module):
         num_patch = (list(output_patches.size())[0] * (list(output_patches.size())[1]))
         num_patch -= invalid_count
         return sum_valid_loss/num_patch
+'''
+
+class PatchLoss(nn.Module):
+    def __initII(self, size_average=None, reduce=None, reduction: str = 'mean') -> None:
+        super(PatchLoss, self).__init__(size_average, reduce, reduction)
+
+    def forward(self, output, target, patch_size):
+        avg_loss = 0
+        for i in range(len(output)):
+            output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+            target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+            max_patch_loss = 0
+            for i in range(list(output_patches.size())[0]):
+                for j in range(list(output_patches.size())[1]):
+                    max_patch_loss = max(max_patch_loss, f.l1_loss(output_patches[i][j], target_patches[i][j]))
+            avg_loss+=max_patch_loss
+        avg_loss/=(list(output_patches.size())[0] * (list(output_patches.size())[1]))
+        return avg_loss;
+
+class WeightedPatchLoss(nn.Module):
+    def __initII(self, size_average=None, reduce=None, reduction: str = 'mean') -> None:
+        super(PatchLoss, self).__init__(size_average, reduce, reduction)
+
+    def forward(self, output, target, patch_size):
+        avg_loss = 0
+        for i in range(len(output)):
+            # split output and target images into patches
+            output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+            target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+            devider = 0
+            weighted_loss = 0
+            # calculate loss for each patch of the image
+            for i in range(list(output_patches.size())[0]):
+                for j in range(list(output_patches.size())[1]):
+                    weighted_loss += f.l1_loss(output_patches[i][j],target_patches[i][j]) * torch.mean(target_patches[i][j])
+                    devider += torch.mean(target_patches[i][j])
+            avg_loss += weighted_loss/devider
+        avg_loss/=(list(output_patches.size())[0] * (list(output_patches.size())[1]))
+        return avg_loss;
+
+class FilteredPatchLoss(nn.Module):
+    def __initII(self, size_average=None, reduce=None, reduction: str = 'mean') -> None:
+        super(PatchLoss, self).__init__(size_average, reduce, reduction)
+
+    def forward(self, output, target, patch_size, filter_rate):
+        avg_loss = 0
+        for i in range(len(output)):
+            # split output and target images into patches
+            output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+            target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+            
+            valid_loss = 0
+            invalid_count = 0
+            # calculate loss for each patch of the image
+            for i in range(list(output_patches.size())[0]):
+                for j in range(list(output_patches.size())[1]):
+                    if torch.mean(target_patches[i][j]) <= filter_rate:
+                        invalid_count += 1
+                    else:
+                        valid_loss += f.l1_loss(output_patches[i][j],target_patches[i][j])
+            avg_loss += valid_loss
+            devider = (list(output_patches.size())[0]) * (list(output_patches.size())[1])
+            devider -= invalid_count
+        return avg_loss/devider
 
 
 if __name__=="__main__":
