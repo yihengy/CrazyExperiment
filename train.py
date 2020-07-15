@@ -5,12 +5,13 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn import functional as f
-from models import DnCNN, PatchLoss
+from models import DnCNN, PatchLoss, WeightedPatchLoss, FilteredPatchLoss
 from dataset import *
 import glob
 import torch.optim as optim
 import uproot
 import matplotlib.pyplot as plt
+from torch.utils.data import DataLoader
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -19,11 +20,12 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 parser = argparse.ArgumentParser(description="DnCNN")
 parser.add_argument("training_path", nargs="?", type=str, default="./data/training", help='path of .root data set to be used for training')
 parser.add_argument("validation_path", nargs="?", type=str, default="./data/validation", help='path of .root data set to be used for validation')
-parser.add_argument("--outf", type=str, default="logs", help='path of log files')
 parser.add_argument("--num_of_layers", type=int, default=9, help="Number of total layers")
-parser.add_argument("--sigma", type=float, default=0.5, help='noise level')
+parser.add_argument("--sigma", type=float, default=20, help='noise level')
+parser.add_argument("--outf", type=str, default="logs", help='path of log files')
 parser.add_argument("--epochs", type=int, default=15, help="Number of training epochs")
 parser.add_argument("--lr", type=float, default=1e-3, help="Initial learning rate")
+parser.add_argument("--batchSize", type=int, default=100, help="Training batch size")
 args = parser.parse_args()
 
 def init_weights(m):
@@ -34,7 +36,7 @@ def init_weights(m):
         nn.init.xavier_uniform_(m.weight)
     elif classname.find('BatchNorm') != -1:
         nn.init.xavier_uniform_(m.weight)
-
+'''
 def main():
     machine = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = DnCNN(channels=1, num_of_layers=args.num_of_layers).to(device=machine)
@@ -96,6 +98,84 @@ def main():
         print("Average loss per image in epoch " + str(epoch) + " of " + str(args.epochs-1) +": "+ str(epoch_loss))
     loss_plot = plt.plot(loss_per_epoch)
     plt.savefig("loss_plot_july_14.png")
+'''
+def main():
+    # choose cpu or gpu
+    if torch.cuda.is_available():
+        args.device = torch.device('cuda')
+        print("Using GPU")
+    else:
+        args.device = torch.device('cpu')
+        print("Using CPU")
+
+    # Load dataset
+    print('Loading dataset ...\n')
+    dataset_train = RootDataset(root_file=args.trainfile, sigma = args.sigma)
+    loader_train = DataLoader(dataset=dataset_train, batch_size=args.batchSize)
+    dataset_val = RootDataset(root_file=args.valfile, sigma=args.sigma)
+    val_train = DataLoader(dataset=dataset_val)
+
+    # Build model
+    model = DnCNN(channels=1, num_of_layers=args.num_of_layers).to(device=args.device)
+    if (args.model == None):
+        model.apply(init_weights)
+        print("Creating new model ")
+    else:
+        print("Loading model from file " + args.model)
+        model.load_state_dict(torch.load(args.model))
+        model.eval()
+
+    # Loss function
+    criterion = WeightedPatchLoss()
+    criterion.to(device=args.device)
+
+    #Optimizer
+    optimizer = optim.Adam(model.parameters(), lr = args.lr)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, factor=0.1, patience=10, verbose=True)
+
+    # training and validation
+    step = 0
+    training_losses = np.zeros(args.epochs)
+    validation_losses = np.zeros(args.epochs)
+    for epoch in range(args.epochs):
+        print("Beginning epoch " + str(epoch))
+        # training
+        train_loss = 0
+        for i, data in enumerate(loader_train, 0):
+            model.train()
+            model.zero_grad()
+            optimizer.zero_grad()
+            truth, noise = data
+            noise = noise.unsqueeze(1)
+            output = model(noise.float().to(args.device))
+            batch_loss = criterion(output.squeeze(1).to(args.device), truth.to(args.device), 50).to(args.device)
+            train_loss += batch_loss.item()
+            batch_loss.backward()
+            optimizer.step()
+            model.eval()
+        training_losses[epoch] = train_loss/len(dataset_train)
+        print("t: "+ str(train_loss/len(dataset_train)))
+        
+        val_loss = 0
+        for i, data in enumerate(val_train, 0):
+            val_truth, val_noise =  data
+            val_output = model(val_noise.unsqueeze(1).float().to(args.device))
+            output_loss = criterion(val_output.squeeze(1).to(args.device), val_truth.to(args.device), 50).to(args.device)
+            val_loss+=output_loss.item()
+            #still in progress
+        scheduler.step(torch.tensor([val_loss]))
+        validation_losses[epoch] = val_loss/len(val_train)
+        print("v: "+ str(val_loss/len(val_train)))
+        # save the model
+        model.eval()
+        torch.save(model.state_dict(), os.path.join(args.outf, 'net.pth'))
+    training = plt.plot(training_losses, label='training')
+    plt.savefig("t_loss_plot_July_15.png")
+    validation = plt.plot(validation_losses, label='validation')
+    plt.savefig("v_loss_plot_July_15.png")
+    plt.legend()
+    plt.savefig("total_loss_plot_July_15.png")
+
 if __name__ == "__main__":
     main()
 

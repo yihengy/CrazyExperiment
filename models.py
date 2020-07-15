@@ -24,35 +24,82 @@ class DnCNN(nn.Module):
     def forward(self, x):
         out = self.dncnn(x)
         return out
-
+        
 class PatchLoss(nn.Module):
     def __initII(self, size_average=None, reduce=None, reduction: str = 'mean') -> None:
         super(PatchLoss, self).__init__(size_average, reduce, reduction)
 
     def forward(self, output, target, patch_size):
-        avg_loss = 0
-        for i in range(len(output)):
-            # split output and target images into patches
-            output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
-            target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
-            max_patch_loss = 0
-            # calculate loss for each patch of the image
-            for i in range(list(output_patches.size())[0]):
-                for j in range(list(output_patches.size())[1]):
-                    max_patch_loss = max(max_patch_loss, f.l1_loss(output_patches[i][j], target_patches[i][j]))
-            avg_loss+=max_patch_loss
-        avg_loss/=len(output)
-        return avg_loss
+        # split output and target images into patches
+        output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        
+        max_patch_loss = 0
+        # calculate loss for each patch of the image
+        for i in range(list(output_patches.size())[0]):
+            for j in range(list(output_patches.size())[1]):
+                max_patch_loss = max(max_patch_loss, f.l1_loss(output_patches[i][j], target_patches[i][j]))
+        return max_patch_loss
+
+class WeightedPatchLoss(nn.Module):
+    def __initII(self, size_average=None, reduce=None, reduction: str = 'mean') -> None:
+        super(PatchLoss, self).__init__(size_average, reduce, reduction)
+
+    def forward(self, output, target, patch_size):
+        # split output and target images into patches
+        output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        
+        sum_weighted_loss = 0
+        devider = 0
+        # calculate loss for each patch of the image
+        for i in range(list(output_patches.size())[0]):
+            for j in range(list(output_patches.size())[1]):
+                sum_weighted_loss += f.l1_loss(output_patches[i][j],target_patches[i][j]) * torch.mean(target_patches[i][j])
+                devider += torch.mean(target_patches[i][j])
+        return sum_weighted_loss/devider
+
+class FilteredPatchLoss(nn.Module):
+    def __initII(self, size_average=None, reduce=None, reduction: str = 'mean') -> None:
+        super(PatchLoss, self).__init__(size_average, reduce, reduction)
+
+    def forward(self, output, target, patch_size, filter_rate):
+        # split output and target images into patches
+        output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
+        
+        sum_valid_loss = 0
+        invalid_count = 0
+        # calculate loss for each patch of the image
+        for i in range(list(output_patches.size())[0]):
+            for j in range(list(output_patches.size())[1]):
+                if torch.mean(target_patches[i][j]) <= filter_rate:
+                    invalid_count += 1
+                else:
+                    sum_valid_loss += f.l1_loss(output_patches[i][j],target_patches[i][j])
+        num_patch = (list(output_patches.size())[0] * (list(output_patches.size())[1]))
+        num_patch -= invalid_count
+        return sum_valid_loss/num_patch
 
 
 if __name__=="__main__":
-    criterion = PatchLoss()
+    criterion_1 = PatchLoss()
+    criterion_2 = WeightedPatchLoss()
+    criterion_3 = FilteredPatchLoss()
+    criterion_4 = f.l1_loss()
     dtype = torch.FloatTensor
     x = Variable(torch.randn(100, 100).type(dtype), requires_grad=False)
     y = Variable(torch.randn(100, 100).type(dtype), requires_grad=False)
-    loss = criterion(x, y, 10)
+    loss_1 = criterion_1(x, y, 10)
+    loss_2 = criterion_2(x, y, 10)
+    loss_3 = criterion_3(x, y, 10, 0.1)
+    loss_4 = criterion_4(x, y)
+    
     print("Test loss: ")
-    print(str(loss))
+    print(str(loss_1))
+    print(str(loss_2))
+    print(str(loss_3))
+    print(str(loss_4))
     net = DnCNN()
     input = torch.randn(1, 1, 32, 32)
     out = net(input)
