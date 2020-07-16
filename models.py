@@ -136,10 +136,10 @@ class FilteredPatchLoss(nn.Module):
             # calculate loss for each patch of the image
             for i in range(list(output_patches.size())[0]):
                 for j in range(list(output_patches.size())[1]):
-                    if torch.mean(target_patches[i][j]) >= 0.5:
+                    if torch.mean(target_patches[i][j]) >= 1:
                         valid_loss += f.l1_loss(output_patches[i][j],target_patches[i][j])
                         devider += 1
-        return avg_loss/devider
+        return valid_loss/devider
 
 
 if __name__=="__main__":

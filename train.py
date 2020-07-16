@@ -344,9 +344,7 @@ def main_3():
     plt.legend()
     plt.savefig("Filteredloss_plot_July_15.png")
 
-
-
 if __name__ == "__main__":
-    main()
+    main_3()
 
 
