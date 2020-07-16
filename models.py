@@ -126,13 +126,13 @@ class FilteredPatchLoss(nn.Module):
 
     def forward(self, output, target, patch_size, filter_rate):
         avg_loss = 0
+        devider = 0
         for i in range(len(output)):
             # split output and target images into patches
             output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
             target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
             
             valid_loss = 0
-            devider = 0
             # calculate loss for each patch of the image
             for i in range(list(output_patches.size())[0]):
                 for j in range(list(output_patches.size())[1]):
