@@ -125,22 +125,20 @@ class FilteredPatchLoss(nn.Module):
         super(PatchLoss, self).__init__(size_average, reduce, reduction)
 
     def forward(self, output, target, patch_size, filter_rate):
-        avg_loss = 0
+        loss = 0
         devider = 0
         for i in range(len(output)):
             # split output and target images into patches
             output_patches = output[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
             target_patches = target[i].unfold(0, patch_size, patch_size).unfold(1, patch_size, patch_size)
             
-            valid_loss = 0
             # calculate loss for each patch of the image
             for i in range(list(output_patches.size())[0]):
                 for j in range(list(output_patches.size())[1]):
                     if torch.mean(target_patches[i][j]) > filter_rate:
-                        valid_loss += f.l1_loss(output_patches[i][j],target_patches[i][j])
+                        loss += f.l1_loss(output_patches[i][j],target_patches[i][j])
                         devider += 1
-            avg_loss += valid_loss
-        return avg_loss/devider
+        return loss/devider
 
 
 if __name__=="__main__":
