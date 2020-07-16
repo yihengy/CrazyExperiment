@@ -347,8 +347,6 @@ def main_3():
 
 
 if __name__ == "__main__":
-    main_2()
-    main()
     main_3()
 
 
