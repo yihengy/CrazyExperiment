@@ -141,8 +141,8 @@ class FilteredPatchLoss(nn.Module):
                     else:
                         valid_loss += f.l1_loss(output_patches[i][j],target_patches[i][j])
             avg_loss += valid_loss
-            devider = (list(output_patches.size())[0]) * (list(output_patches.size())[1])
-            devider -= invalid_count
+        devider = (list(output_patches.size())[0]) * (list(output_patches.size())[1])
+        devider -= invalid_count
         return avg_loss/devider
 
 
