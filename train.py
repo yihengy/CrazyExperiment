@@ -21,9 +21,9 @@ parser = argparse.ArgumentParser(description="DnCNN")
 parser.add_argument("training_path", nargs="?", type=str, default="./data/training", help='path of .root data set to be used for training')
 parser.add_argument("validation_path", nargs="?", type=str, default="./data/validation", help='path of .root data set to be used for validation')
 parser.add_argument("--num_of_layers", type=int, default=9, help="Number of total layers")
-parser.add_argument("--sigma", type=float, default=20, help='noise level')
+parser.add_argument("--sigma", type=float, default=15, help='noise level')
 parser.add_argument("--outf", type=str, default="logs", help='path of log files')
-parser.add_argument("--epochs", type=int, default=30, help="Number of training epochs")
+parser.add_argument("--epochs", type=int, default=5, help="Number of training epochs")
 parser.add_argument("--lr", type=float, default=1e-3, help="Initial learning rate")
 parser.add_argument("--trainfile", type=str, default="test.root", help='path of .root file for training')
 parser.add_argument("--valfile", type=str, default="test.root", help='path of .root file for validation')
@@ -109,14 +109,14 @@ def main():
         print("Validation: "+ str(val_loss/len(val_train)))
         # save the model
         model.eval()
-        torch.save(model.state_dict(), os.path.join(args.outf, 'net_720.pth'))
+        torch.save(model.state_dict(), os.path.join(args.outf, 'net_720_1.pth'))
     training = plt.plot(training_losses, label='training')
     validation = plt.plot(validation_losses, label='validation')
     plt.legend()
-    plt.savefig("Patch_plot_July_20.png")
+    plt.savefig("Patch_plot_July_20_2.png")
 
     #make some images and store to csv
-    
+    '''
     branch = get_all_histograms("test.root")
     for image in range(10):
         model.to('cpu')
@@ -133,6 +133,7 @@ def main():
         #truth = data.numpy()
         #diff = output-truth
         #np.savetxt('logs/difval#' + str(image) + '.txt', diff)
+    '''
     
 if __name__ == "__main__":
     main()

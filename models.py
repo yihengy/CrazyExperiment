@@ -9,8 +9,8 @@ from torch.autograd import Variable
 class DnCNN(nn.Module):
     def __init__(self, channels=1, num_of_layers=9):
         super(DnCNN, self).__init__()
-        kernel_size = 5
-        padding = 1
+        kernel_size = 21
+        padding = 7
         features = 64
         layers = []
         layers.append(nn.Conv2d(in_channels=channels, out_channels=features, kernel_size=kernel_size, padding=padding, bias=False))
