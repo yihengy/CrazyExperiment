@@ -1,0 +1,19 @@
+
+(process:232987): Gtk-WARNING **: 07:10:44.594: Locale not supported by C library.
+	Using the fallback 'C' locale.
+Traceback (most recent call last):
+  File "topng.py", line 3, in <module>
+    from matplotlib.pyplot import imshow, savefig
+  File "/usr/lib64/python2.7/site-packages/matplotlib/pyplot.py", line 97, in <module>
+    _backend_mod, new_figure_manager, draw_if_interactive, _show = pylab_setup()
+  File "/usr/lib64/python2.7/site-packages/matplotlib/backends/__init__.py", line 25, in pylab_setup
+    globals(),locals(),[backend_name])
+  File "/usr/lib64/python2.7/site-packages/matplotlib/backends/backend_gtkagg.py", line 10, in <module>
+    from matplotlib.backends.backend_gtk import gtk, FigureManagerGTK, FigureCanvasGTK,\
+  File "/usr/lib64/python2.7/site-packages/matplotlib/backends/backend_gtk.py", line 13, in <module>
+    import gtk; gdk = gtk.gdk
+  File "/usr/lib64/python2.7/site-packages/gtk-2.0/gtk/__init__.py", line 64, in <module>
+    _init()
+  File "/usr/lib64/python2.7/site-packages/gtk-2.0/gtk/__init__.py", line 52, in _init
+    _gtk.init_check()
+RuntimeError: could not open display
