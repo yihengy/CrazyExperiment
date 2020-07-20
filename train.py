@@ -23,7 +23,7 @@ parser.add_argument("validation_path", nargs="?", type=str, default="./data/vali
 parser.add_argument("--num_of_layers", type=int, default=9, help="Number of total layers")
 parser.add_argument("--sigma", type=float, default=20, help='noise level')
 parser.add_argument("--outf", type=str, default="logs", help='path of log files')
-parser.add_argument("--epochs", type=int, default=50, help="Number of training epochs")
+parser.add_argument("--epochs", type=int, default=30, help="Number of training epochs")
 parser.add_argument("--lr", type=float, default=1e-3, help="Initial learning rate")
 parser.add_argument("--trainfile", type=str, default="test.root", help='path of .root file for training')
 parser.add_argument("--valfile", type=str, default="test.root", help='path of .root file for validation')
@@ -109,7 +109,7 @@ def main():
         print("Validation: "+ str(val_loss/len(val_train)))
         # save the model
         model.eval()
-        torch.save(model.state_dict(), os.path.join(args.outf, 'net_1.pth'))
+        torch.save(model.state_dict(), os.path.join(args.outf, 'net_720.pth'))
     training = plt.plot(training_losses, label='training')
     validation = plt.plot(validation_losses, label='validation')
     plt.legend()
@@ -130,9 +130,9 @@ def main():
         noisy = noisy.unsqueeze(1)
         output = model(noisy.float()).squeeze(0).squeeze(0).detach().numpy()
         np.savetxt('logs/denoised#' + str(image) + '.txt', output)
-        truth = data.numpy()
-        diff = output-truth
-        np.savetxt('logs/difval#' + str(image) + '.txt', diff)
+        #truth = data.numpy()
+        #diff = output-truth
+        #np.savetxt('logs/difval#' + str(image) + '.txt', diff)
     
 if __name__ == "__main__":
     main()
