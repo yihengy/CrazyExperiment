@@ -23,7 +23,7 @@ parser.add_argument("validation_path", nargs="?", type=str, default="./data/vali
 parser.add_argument("--num_of_layers", type=int, default=9, help="Number of total layers")
 parser.add_argument("--sigma", type=float, default=15, help='noise level')
 parser.add_argument("--outf", type=str, default="logs", help='path of log files')
-parser.add_argument("--epochs", type=int, default=5, help="Number of training epochs")
+parser.add_argument("--epochs", type=int, default=70, help="Number of training epochs")
 parser.add_argument("--lr", type=float, default=1e-3, help="Initial learning rate")
 parser.add_argument("--trainfile", type=str, default="test.root", help='path of .root file for training')
 parser.add_argument("--valfile", type=str, default="test.root", help='path of .root file for validation')
@@ -109,31 +109,28 @@ def main():
         print("Validation: "+ str(val_loss/len(val_train)))
         # save the model
         model.eval()
-        torch.save(model.state_dict(), os.path.join(args.outf, 'net_720_1.pth'))
+        torch.save(model.state_dict(), os.path.join(args.outf, 'net_720_rd2.pth'))
     training = plt.plot(training_losses, label='training')
     validation = plt.plot(validation_losses, label='validation')
     plt.legend()
-    plt.savefig("Patch_plot_July_20_2.png")
+    plt.savefig("Patch_plot_July_rd2.png")
 
     #make some images and store to csv
-    '''
+    
     branch = get_all_histograms("test.root")
     for image in range(10):
         model.to('cpu')
         data = get_bin_weights(branch, image).copy()
-        np.savetxt('logs/truth#' + str(image) + '.txt', data)
+        np.savetxt('logs/truth#rd2-' + str(image) + '.txt', data)
         noisy = add_noise(data, args.sigma).copy()
-        np.savetxt('logs/noised#' + str(image) + '.txt', noisy)
+        np.savetxt('logs/noised#rd2-' + str(image) + '.txt', noisy)
         data = torch.from_numpy(data)
         noisy = torch.from_numpy(noisy)
         noisy = noisy.unsqueeze(0)
         noisy = noisy.unsqueeze(1)
         output = model(noisy.float()).squeeze(0).squeeze(0).detach().numpy()
-        np.savetxt('logs/denoised#' + str(image) + '.txt', output)
-        #truth = data.numpy()
-        #diff = output-truth
-        #np.savetxt('logs/difval#' + str(image) + '.txt', diff)
-    '''
+        np.savetxt('logs/denoised#rd2-' + str(image) + '.txt', output)
+    
     
 if __name__ == "__main__":
     main()
